@@ -1,4 +1,4 @@
-function transferData() {
+
 const drawBtn = document.querySelector("#draw");
 const choicesDiv = document.querySelector("#choices");
 const compDuoDiv = document.querySelector("#comp-duo");
@@ -11,8 +11,8 @@ const playAgainBtn = document.querySelector("#play-again");
 const winsText = document.querySelector("#wins");
 const lossesTest = document.querySelector("#losses");
 const chooseHeader = document.querySelector("#choose-header");
-const yourDuoHeader = document.querySelector("#your-duo-header");
-const compDuoHeader = document.querySelector("#comp-duo-header");
+const yourDuoHeader = document.querySelecto("#your-duo-header");
+const compDuoHeader = document.querySelecto("#comp-duo-header");
 
 let choices = [];
 let compDuo = [];
@@ -179,11 +179,27 @@ const getAllBots = () => {
   });
 };
 
+function resetScore() {
+  fetch("/api/reset", { method: "POST" })
+  .then((response) => {
+    if (!response.ok) {
+      throw new Error("Error resetting score");
+    }
+    return response.text();
+  })
+  .then((data) => {
+    console.log(data);
+    getPlayerStats();
+  })
+  .catch((error) => {
+    console.error("An Error occured while resetting score", error);
+  });
+}
+
 drawBtn.addEventListener("click", drawFive);
 duelBtn.addEventListener("click", duel);
 playAgainBtn.addEventListener("click", reset);
 seeAllBtn.addEventListener("click", getAllBots);
 
+window.onload = resetScore;
 getPlayerStats();
-}
-module.exports.transferData = transferData;

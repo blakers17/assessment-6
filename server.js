@@ -1,15 +1,25 @@
 const express = require("express");
+const app = express();
 const bots = require("./src/botsData");
 const shuffle = require("./src/shuffle");
-const index = require("./src/index.js");
-index.transferData();
+
 const playerRecord = {
   wins: 0,
   losses: 0,
 };
-const app = express();
+//add rollbar library here
+const Rollbar = require("rollbar");
+const rollbar = new Rollbar({
+  accessToken: "f4b1b1b3b1b14b1b1b1b1b1b1b1b1b1",
+  captureUncaught: true,
+  captureUnhandledRejections: true,
+});
+
+// add message here
+rollbar.log("Hello world!");
 
 app.use(express.json());
+app.use(express.static(__dirname + "/public"));
 
 // Add up the total health of all the robots
 const calculateTotalHealth = (robots) =>
@@ -38,9 +48,13 @@ const calculateHealthAfterAttack = ({ playerDuo, compDuo }) => {
 
 app.get("/api/robots", (req, res) => {
   try {
+    let botsArr = bots;
+    console.log(botsArr);
+    roolbar.log("Bots array was sent");
     res.status(200).send(botsArr);
   } catch (error) {
     console.error("ERROR GETTING BOTS", error);
+    rollbar.error("Error getting bots");
     res.sendStatus(400);
   }
 });
@@ -48,15 +62,18 @@ app.get("/api/robots", (req, res) => {
 app.get("/api/robots/shuffled", (req, res) => {
   try {
     let shuffled = shuffle(bots);
+    rollbar.log("Bots array was shuffled");
     res.status(200).send(shuffled);
   } catch (error) {
     console.error("ERROR GETTING SHUFFLED BOTS", error);
+    rollbar.error("Error getting shuffled bots");
     res.sendStatus(400);
   }
 });
 
 app.post("/api/duel", (req, res) => {
   try {
+    rollbar.log("Dueling");
     const { compDuo, playerDuo } = req.body;
 
     const { compHealth, playerHealth } = calculateHealthAfterAttack({
@@ -80,9 +97,23 @@ app.post("/api/duel", (req, res) => {
 
 app.get("/api/player", (req, res) => {
   try {
+    rollbar.log("Getting player stats");
     res.status(200).send(playerRecord);
   } catch (error) {
     console.log("ERROR GETTING PLAYER STATS", error);
+    rollbar.error("Error getting player stats");
+    res.sendStatus(400);
+  }
+});
+app.post("/api/reset", (req, res) => {
+  try {
+    rollbar.log("Resetting player stats");
+    playerRecord.wins = 0;
+    playerRecord.losses = 0;
+    res.status(200).send("Player stats reset");
+  } catch (error) {
+    console.log("ERROR RESETTING PLAYER STATS", error);
+    rollbar.error("Error resetting player stats");
     res.sendStatus(400);
   }
 });
